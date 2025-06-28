@@ -7,7 +7,7 @@ import { baseProcedure, createTRPCRouter } from '../init';
  * Aquí se agrupan todos los sub-routers y procedimientos de tu API.
  */
 export const appRouter = createTRPCRouter({
-  hello: baseProcedure
+  createAI: baseProcedure
     .input(
       z.object({
         text: z.string(),
