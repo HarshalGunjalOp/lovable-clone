@@ -40,6 +40,8 @@ RUN echo '{ \
 
 RUN npx --yes shadcn@latest add --all --yes
 
+EXPOSE 3000
+
 # The Docker image you see here is the one that works for me. 
 # The --yes flags weren't being applied, so I had to change the setup.
 # If the original code works for you, go ahead and use it.

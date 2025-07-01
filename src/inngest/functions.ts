@@ -9,7 +9,7 @@ export const helloWorld = inngest.createFunction(
   async ({ event, step }) => {
 
     const sandboxId = await step.run("get-sandbox-id", async () => {
-      const sandbox = await Sandbox.create("lovableclone - test4");
+      const sandbox = await Sandbox.create("lovableclone-test4");
       return sandbox.sandboxId;
     })
 
@@ -25,7 +25,7 @@ export const helloWorld = inngest.createFunction(
 
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
-      const host = sandbox.getHost(3000);
+      const host = sandbox.getHost(3000)
       return `https://${host}`
     })
     
@@ -34,3 +34,5 @@ export const helloWorld = inngest.createFunction(
     return { output, sandboxUrl };
   },
 );
+
+
