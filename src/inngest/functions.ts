@@ -1,5 +1,5 @@
 import { inngest } from "./client";
-import { openai, createAgent, gemini, createTool } from "@inngest/agent-kit";
+import { createAgent, gemini, createTool, createNetwork } from "@inngest/agent-kit";
 import  { Sandbox } from "@e2b/code-interpreter"
 import { getSandbox } from "./utils";
 import { z } from "zod";
@@ -133,9 +133,26 @@ export const helloWorld = inngest.createFunction(
       },
     });
 
-    const { output } = await codeAgent.run(
-      `Write the following snippet: ${event.data.value}`,
-    )
+    const network = createNetwork({
+      name: "coding-agent-network",
+      agents: [codeAgent],
+      maxIter: 15,
+      router: async ({ network }) => {
+        const summary = network.state.data.summary;
+
+        if(summary){
+          return
+        }
+
+        return codeAgent;
+      }
+    })
+
+    // const { output } = await codeAgent.run(
+    //   `Write the following snippet: ${event.data.value}`,
+    // )
+
+    const result = await network.run(event.data.value);
 
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
@@ -143,9 +160,14 @@ export const helloWorld = inngest.createFunction(
       return `https://${host}`
     })
     
-    console.log(output, sandboxUrl)
+    console.log(sandboxUrl, result)
 
-    return { output, sandboxUrl };
+    return {
+      sandboxUrl,
+      title: "Fragment",
+      files: result.state.data.files,
+      summary: result.state.data.summary
+    };
   },
 );
 
