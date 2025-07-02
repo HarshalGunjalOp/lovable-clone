@@ -22,6 +22,7 @@ export const helloWorld = inngest.createFunction(
       system: "You are an expert next.js developer. You write readable, maintainable, and testable code. You write simple Next.js & React snippets.",
       model: gemini({ model: "gemini-1.5-flash", apiKey: process.env.GEMINI_API_KEY }),
       tools: [
+        
         createTool({
           name: "terminal",
           description: "Use the terminal to run commands",
@@ -48,9 +49,47 @@ export const helloWorld = inngest.createFunction(
                 );
                 return `Command failed: ${e} \nstdout: ${buffers.stdout}\nstderror: ${buffers.stderr}`  
               }
-            })
+            });
+          },
+        }),
+
+        createTool({
+          name: "createOrUpdateFiles",
+          description: "Create or update files in the sandbox",
+          parameters: z.object({
+            files: z.array(
+              z.object({
+                path: z.string(),
+                content: z.string(),
+              }),
+            ),
+          }),
+          handler: async (
+            { files },
+            { step, network }
+          ) => {
+            const newFiles = await step?.run("createOrUpdateFiles", async () => {
+              try {
+                const updatedFiles = network.state.data.files || {};
+                const sandbox = await getSandbox(sandboxId);
+                for (const file of files) {
+                  await sandbox.files.write(file.path, file.content);
+                  updatedFiles[file.path] = file.content;
+                }
+
+                return updatedFiles;
+              } catch(e) {
+                return "Error: " + e;
+              }
+            });
+
+            if(typeof newFiles === "object"){
+              network.state.data.files = newFiles;
+            }
           }
-        })
+        }),
+
+        
       ]
     });
 
