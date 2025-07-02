@@ -3,6 +3,8 @@ import { openai, createAgent, gemini, createTool } from "@inngest/agent-kit";
 import  { Sandbox } from "@e2b/code-interpreter"
 import { getSandbox } from "./utils";
 import { z } from "zod";
+import { PROMPT } from "../prompt";
+import { lastAssistantTextMessageContent } from "./utils";
 
 export const helloWorld = inngest.createFunction(
   
@@ -19,8 +21,12 @@ export const helloWorld = inngest.createFunction(
 
     const codeAgent = createAgent({
       name: "code-agent",
-      system: "You are an expert next.js developer. You write readable, maintainable, and testable code. You write simple Next.js & React snippets.",
-      model: gemini({ model: "gemini-1.5-flash", apiKey: process.env.GEMINI_API_KEY }),
+      description: "An expert coding agent",
+      system: PROMPT,
+      model: gemini({
+        model: "gemini-1.5-flash", 
+        apiKey: process.env.GEMINI_API_KEY
+      }),
       tools: [
         
         createTool({
@@ -111,7 +117,20 @@ export const helloWorld = inngest.createFunction(
             })
           },
         })
-      ]
+      ],
+      lifecycle: {
+        onResponse: async ({ result, network}) => {
+          const lastAssistantMessageText = lastAssistantTextMessageContent(result);
+
+          if(lastAssistantMessageText && network){
+            if(lastAssistantMessageText.includes("<task_summary>")){
+              network.state.data.taskSummary = lastAssistantMessageText;
+            }
+          }
+
+          return result;
+        },
+      },
     });
 
     const { output } = await codeAgent.run(
