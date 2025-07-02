@@ -8,11 +8,6 @@ export const helloWorld = inngest.createFunction(
   { event: "test/hello.world" },
   async ({ event, step }) => {
 
-    const sandboxId = await step.run("get-sandbox-id", async () => {
-      const sandbox = await Sandbox.create("lovableclone-test4");
-      return sandbox.sandboxId;
-    })
-
     const codeAgent = createAgent({
       name: "code-agent",
       system: "You are an expert next.js developer. You write readable, maintainable, and testable code. You write simple Next.js & React snippets.",
@@ -22,6 +17,12 @@ export const helloWorld = inngest.createFunction(
     const { output } = await codeAgent.run(
       `Write the following snippet: ${event.data.value}`,
     )
+
+    const sandboxId = await step.run("get-sandbox-id", async () => {
+      const sandbox = await Sandbox.create("lovableclone-test9");
+      //await sandbox.setTimeout(60)
+      return sandbox.sandboxId;
+    })
 
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
@@ -34,5 +35,7 @@ export const helloWorld = inngest.createFunction(
     return { output, sandboxUrl };
   },
 );
+
+
 
 
