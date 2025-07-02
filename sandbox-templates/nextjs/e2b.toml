@@ -14,3 +14,6 @@ team_id = "ef3763a5-5a9e-462c-92c8-412fd3e7f4d4"
 dockerfile = "e2b.Dockerfile"
 template_name = "lovableclone-test9"
 template_id = "pt6ix8xcu5gv3yslryf9"
+
+[sandbox]
+ports = [3000]
