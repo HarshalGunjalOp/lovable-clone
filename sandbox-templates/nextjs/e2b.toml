@@ -11,6 +11,7 @@
 # const sandbox = await Sandbox.create('lovableclone-test10')
 
 team_id = "ef3763a5-5a9e-462c-92c8-412fd3e7f4d4"
+start_cmd = "/compile_page.sh"
 dockerfile = "e2b.Dockerfile"
 template_name = "lovableclone-test10"
 template_id = "kcjl7pn5icp2k9658qsh"
