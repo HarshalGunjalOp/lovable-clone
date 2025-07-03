@@ -7,10 +7,10 @@ import { PROMPT } from "../prompt";
 import { lastAssistantTextMessageContent } from "./utils";
 import { prisma } from "@/lib/db";
 
-export const helloWorld = inngest.createFunction(
+export const codeAgent = inngest.createFunction(
   
-  { id: "hello-world" },
-  { event: "test/hello.world" },
+  { id: "code-agent" },
+  { event: "code-agent/run" },
 
   async ({ event, step }) => {
 
