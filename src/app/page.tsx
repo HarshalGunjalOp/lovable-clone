@@ -20,7 +20,10 @@ const Page = () => {
   return (
     <div className="p-4 max-w-7xl mx-auto">
       <Input value={ value } onChange={ (e) => setValue(e.target.value) }/>
-      <Button onClick={() => createMessage.mutate({ value: value})}>
+      <Button 
+        disabled={createMessage.isPending}
+        onClick={() => createMessage.mutate({ value: value})}
+      >
         Invoque Background Job
       </Button>
     </div>
