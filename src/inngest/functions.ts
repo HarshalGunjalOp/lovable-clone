@@ -14,7 +14,7 @@ export const helloWorld = inngest.createFunction(
   async ({ event, step }) => {
 
     const sandboxId = await step.run("get-sandbox-id", async () => {
-      const sandbox = await Sandbox.create("lovableclone-test9");
+      const sandbox = await Sandbox.create("lovableclone-test10");
       //await sandbox.setTimeout(60)
       return sandbox.sandboxId;
     })
