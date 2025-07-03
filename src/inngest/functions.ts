@@ -1,5 +1,5 @@
 import { inngest } from "./client";
-import { createAgent, gemini, createTool, createNetwork } from "@inngest/agent-kit";
+import { createAgent, gemini, createTool, createNetwork, type Tool } from "@inngest/agent-kit";
 import  { Sandbox } from "@e2b/code-interpreter"
 import { getSandbox } from "./utils";
 import { z } from "zod";
@@ -7,7 +7,14 @@ import { PROMPT } from "../prompt";
 import { lastAssistantTextMessageContent } from "./utils";
 import { prisma } from "@/lib/db";
 
-export const codeAgent = inngest.createFunction(
+interface AgentState {
+  summary: string;
+  files: {
+    [path: string]: string
+  }
+}
+
+export const codeAgentFunction = inngest.createFunction(
   
   { id: "code-agent" },
   { event: "code-agent/run" },
@@ -20,7 +27,7 @@ export const codeAgent = inngest.createFunction(
       return sandbox.sandboxId;
     })
 
-    const codeAgent = createAgent({                                                  // Crear agente de código
+    const codeAgent = createAgent<AgentState>({                                      // Crear agente de código
       name: "code-agent",
       description: "An expert coding agent",
       system: PROMPT,
@@ -73,7 +80,7 @@ export const codeAgent = inngest.createFunction(
           }),
           handler: async (
             { files },
-            { step, network }
+            { step, network }: Tool.Options<AgentState>
           ) => {
             const newFiles = await step?.run("createOrUpdateFiles", async () => {
               try {
@@ -134,7 +141,7 @@ export const codeAgent = inngest.createFunction(
       },
     });
 
-    const network = createNetwork({                                                  // El network es el contenedor que ejecuta a los agentes en un ciclo, utiliza el router para decidir el siguiente paso y usa el state para mantener la memoria del trabajo realizado.       
+    const network = createNetwork<AgentState>({                                      // El network es el contenedor que ejecuta a los agentes en un ciclo, utiliza el router para decidir el siguiente paso y usa el state para mantener la memoria del trabajo realizado.       
       name: "coding-agent-network",
       agents: [codeAgent],                                                           // Actualmente tenemos un solo agente de código
       maxIter: 15,
@@ -151,6 +158,10 @@ export const codeAgent = inngest.createFunction(
 
     const result = await network.run(event.data.value);                              // Inicia la ejecución de la red de agentes con el input del usuario y espera a que se complete. 
 
+    const isError = 
+      !result.state.data.summary ||
+      Object.keys(result.state.data.files || {}).length === 0;
+
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
       const host = sandbox.getHost(3000)
@@ -158,6 +169,17 @@ export const codeAgent = inngest.createFunction(
     })
     
     await step.run("save-result", async() => {                                       // Guardar el resultado de la tarea en la base de datos
+      
+      if( isError ){
+        return await prisma.message.create({
+          data: {
+            content: "Something went wrong. Please try again.",
+            role: "ASSISTANT",
+            type: "ERROR",
+          }
+        })
+      }
+      
       return await prisma.message.create({
         data: {
           content: result.state.data.summary,
