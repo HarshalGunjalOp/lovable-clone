@@ -5,6 +5,7 @@ import { getSandbox } from "./utils";
 import { z } from "zod";
 import { PROMPT } from "../prompt";
 import { lastAssistantTextMessageContent } from "./utils";
+import { prisma } from "@/lib/db";
 
 export const helloWorld = inngest.createFunction(
   
@@ -19,7 +20,7 @@ export const helloWorld = inngest.createFunction(
       return sandbox.sandboxId;
     })
 
-    const codeAgent = createAgent({
+    const codeAgent = createAgent({                                                  // Crear agente de código
       name: "code-agent",
       description: "An expert coding agent",
       system: PROMPT,
@@ -27,7 +28,7 @@ export const helloWorld = inngest.createFunction(
         model: "gemini-1.5-flash", 
         apiKey: process.env.GEMINI_API_KEY
       }),
-      tools: [
+      tools: [                                                                       // Herramientas del agente de código
         
         createTool({
           name: "terminal",
@@ -118,41 +119,37 @@ export const helloWorld = inngest.createFunction(
           },
         })
       ],
-      lifecycle: {
+      lifecycle: {                                                                   // Eventos de vida del agente de código
         onResponse: async ({ result, network}) => {
-          const lastAssistantMessageText = lastAssistantTextMessageContent(result);
+          const lastAssistantMessageText = lastAssistantTextMessageContent(result);  // Obtener el último mensaje de texto de la respuesta del agente de código
 
-          if(lastAssistantMessageText && network){
-            if(lastAssistantMessageText.includes("<task_summary>")){
-              network.state.data.taskSummary = lastAssistantMessageText;
+          if (lastAssistantMessageText && network) {                                 // Si existe un último mensaje y un estado de trabajo del agente
+            if(lastAssistantMessageText.includes("<task_summary>")){                 // Y el último mensaje de texto es un resumen de tarea
+              network.state.data.summary = lastAssistantMessageText;                 // lo guardamos en el estado compartido de la red. Esta es la señal de que la tarea ha finalizado.
             }
           }
 
-          return result;
+          return result;                                                             // Devolver la respuesta del agente de código
         },
       },
     });
 
-    const network = createNetwork({
+    const network = createNetwork({                                                  // El network es el contenedor que ejecuta a los agentes en un ciclo, utiliza el router para decidir el siguiente paso y usa el state para mantener la memoria del trabajo realizado.       
       name: "coding-agent-network",
-      agents: [codeAgent],
+      agents: [codeAgent],                                                           // Actualmente tenemos un solo agente de código
       maxIter: 15,
-      router: async ({ network }) => {
-        const summary = network.state.data.summary;
+      router: async ({ network }) => {                                               // el router decide qué agente debe actuar a continuación. Para ello usa network.state que es un state que almacena información durante la ejecutcion de las herramientas y el lifecycle de un agente de IA.
+        const summary = network.state.data.summary;                                  // Si el resumen de tarea está presente, no debe actuar porque ya se ha completado la tarea
 
         if(summary){
           return
         }
 
-        return codeAgent;
+        return codeAgent;                                                            //  Si no hay resumen, pasa el control al único agente disponible, codeAgent".
       }
     })
 
-    // const { output } = await codeAgent.run(
-    //   `Write the following snippet: ${event.data.value}`,
-    // )
-
-    const result = await network.run(event.data.value);
+    const result = await network.run(event.data.value);                              // Inicia la ejecución de la red de agentes con el input del usuario y espera a que se complete. 
 
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
@@ -160,7 +157,22 @@ export const helloWorld = inngest.createFunction(
       return `https://${host}`
     })
     
-    console.log(sandboxUrl, result)
+    await step.run("save-result", async() => {                                       // Guardar el resultado de la tarea en la base de datos
+      return await prisma.message.create({
+        data: {
+          content: result.state.data.summary,
+          role: "ASSISTANT",
+          type: "RESULT",
+          fragment: {
+            create: {
+              sandboxUrl: sandboxUrl,
+              title: "Fragment",
+              files: result.state.data.files,
+            }
+          }
+        }
+      })
+    })
 
     return {
       sandboxUrl,
