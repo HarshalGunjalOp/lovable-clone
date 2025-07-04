@@ -19,7 +19,7 @@ export const codeAgentFunction = inngest.createFunction(
   { id: "code-agent" },
   { event: "code-agent/run" },
 
-  async ({ event, step }) => {
+  async ({ event, step }) => { // event contiene el propmt y el projectId
 
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create("lovableclone-test12");
@@ -173,6 +173,7 @@ export const codeAgentFunction = inngest.createFunction(
       if( isError ){
         return await prisma.message.create({
           data: {
+            projectId: event.data.projectId,
             content: "Something went wrong. Please try again.",
             role: "ASSISTANT",
             type: "ERROR",
@@ -182,6 +183,7 @@ export const codeAgentFunction = inngest.createFunction(
       
       return await prisma.message.create({
         data: {
+          projectId: event.data.projectId,
           content: result.state.data.summary,
           role: "ASSISTANT",
           type: "RESULT",
