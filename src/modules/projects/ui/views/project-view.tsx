@@ -1,8 +1,10 @@
 "use client"
 
-import { useTRPC } from "@/trpc/client";
-import { useSuspenseQuery } from "@tanstack/react-query"
+
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { MessagesContainer } from "../components/messages-container";
+import { Suspense } from "react";
+
 
 interface Props {
   projectId: string
@@ -10,24 +12,28 @@ interface Props {
 
 export const ProjectView = ({ projectId }: Props) => {
 
-  const trpc = useTRPC();
-
-  const baseQueryOptionsProjects = trpc.projects.getOne.queryOptions({ id: projectId }) // Obtenemos un proyecto en base a su Id
-  const { data: project } = useSuspenseQuery({
-    ...baseQueryOptionsProjects,
-    retry: 3,
-  });
-
-  const baseQueryOptionsMessages = trpc.messages.getMany.queryOptions({ projectId })    // Obtenemos los mensajes de un proyecto en base a su Id
-  const { data: messages } = useSuspenseQuery({
-    ...baseQueryOptionsMessages,
-    retry: 3,
-  });
-
   return (
-    <div>
-      {JSON.stringify(project)}
-      {JSON.stringify(messages, null, 2)}
+    <div className="h-screen">
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel
+          defaultSize={35}
+          minSize={20}
+          className="flex flex-col min-h-0"
+        >
+          <Suspense fallback={<div>Loading messages</div>}>
+            <MessagesContainer projectId={projectId} />
+          </Suspense>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+       <ResizablePanel
+          defaultSize={65}
+          minSize={50}
+       >
+          TODO: Preview
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   )
 }

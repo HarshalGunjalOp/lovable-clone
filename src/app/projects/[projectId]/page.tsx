@@ -23,7 +23,7 @@ const Page = async({ params }: Props) => {
     // HydrationBoundary es una utilidad de TanStack Query recibe el estado serializado de la caché a través la prop state
     // Cuando se carga <AgentsView /> HydrationBoundary se encarga de volver a cargar la caché y "deserializa"/hydrata los datos
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div>Loading project...</div>}>
         {/* <ErrorBoundary fallback={<div>Something went wrong...</div>}> */}
           <ProjectView projectId={projectId} />
         {/* </ErrorBoundary> */}
