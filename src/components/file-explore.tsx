@@ -58,13 +58,13 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
         minSize={30}
         className="bg-sidebar"
       >
-        <p>
+        
           <TreeView
             data={treeData}
             value={selectedFile}
             onSelect={handleFileSelect}
           />
-        </p>
+        
       </ResizablePanel>
 
       <ResizableHandle className="hover:bg-primary transition-colors" />
