@@ -12,6 +12,7 @@ import { CodeIcon, Crown, CrownIcon, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CodeView } from "@/components/code-view";
+import { FileExplorer } from "@/components/file-explore";
 
 
 interface Props {
@@ -89,10 +90,15 @@ export const ProjectView = ({ projectId }: Props) => {
             </TabsContent>
             <TabsContent value="code">
               
-                <CodeView
+              {!!activeFragment?.files && (
+                <FileExplorer 
+                  files={activeFragment.files as { [path: string]: string }}
+                />
+              )}
+                {/* <CodeView
                   lang="ts"
                   code="const a = Hello world"
-                />
+                /> */}
               
             </TabsContent>
           </Tabs>
