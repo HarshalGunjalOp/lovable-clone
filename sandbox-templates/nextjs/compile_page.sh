@@ -16,20 +16,17 @@ function ping_server() {
  	done
  }
 
-# ping_server &
-cd /home/user && npx next dev --turbopack --port 3000 --host 0.0.0.0
-
-ping_server &
-
 cd /home/user
 
-# # Instalar dependencias si es necesario
+# Instalar dependencias si es necesario
 if [ ! -d node_modules ]; then
   echo "Instalando dependencias..."
   npm install
 fi
 
-# # Iniciar servidor Next.js
+# Iniciar servidor Next.js
 echo "Iniciando servidor Next.js en puerto 3000..."
-npx next dev --turbopack --port 3000 --hostname 0.0.0.0 2>&1
+npx next dev --turbopack --port 3000 --hostname 0.0.0.0 2>&1 &
+
+ping_server
 
