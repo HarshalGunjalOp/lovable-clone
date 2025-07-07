@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CodeIcon, Crown, CrownIcon, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { CodeView } from "@/components/code-view";
 
 
 interface Props {
@@ -87,9 +88,12 @@ export const ProjectView = ({ projectId }: Props) => {
                 {!!activeFragment && <FragmentWeb data={activeFragment} />}
             </TabsContent>
             <TabsContent value="code">
-              <p>
-                // TODO: Code view
-              </p>
+              
+                <CodeView
+                  lang="ts"
+                  code="const a = Hello world"
+                />
+              
             </TabsContent>
           </Tabs>
         </ResizablePanel>
