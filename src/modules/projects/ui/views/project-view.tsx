@@ -88,18 +88,13 @@ export const ProjectView = ({ projectId }: Props) => {
             <TabsContent value="preview">
                 {!!activeFragment && <FragmentWeb data={activeFragment} />}
             </TabsContent>
-            <TabsContent value="code">
+            <TabsContent value="code" className="min-h-0">
               
               {!!activeFragment?.files && (
                 <FileExplorer 
                   files={activeFragment.files as { [path: string]: string }}
                 />
-              )}
-                {/* <CodeView
-                  lang="ts"
-                  code="const a = Hello world"
-                /> */}
-              
+              )}  
             </TabsContent>
           </Tabs>
         </ResizablePanel>
