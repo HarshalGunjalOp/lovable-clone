@@ -27,6 +27,15 @@ function getLanguageFromExtension(filename:string):string {
   const extension = filename.split(".")?.pop()?.toLowerCase();
   return extension || "text"
 }
+function decodeHtmlEntities(text: string): string {
+ 
+  if (typeof document === 'undefined') {
+    return text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  }
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+}
 
 interface FileBreadcrumbProps {
   filepath: string;
@@ -131,6 +140,18 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
     }
   },[selectedFile, files])
 
+  const decodedCode = useMemo(() => {
+    if (!selectedFile || !files[selectedFile]) {
+      return "";
+    }
+    let code = decodeHtmlEntities(files[selectedFile] || "");
+    // The AI sometimes wraps the code in backticks, which we need to remove.
+    if (code.startsWith('`') && code.endsWith('`')) {
+      code = code.slice(1, -1);
+    }
+    return code;
+  }, [selectedFile, files]);
+
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel
@@ -162,7 +183,7 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
                   size="icon"
                   className="ml-auto"
                   onClick={handleCopy}
-                  disabled={copied}
+                  disabled={!selectedFile || copied}
                 > 
                   {copied ? <CopyCheckIcon /> : <CopyIcon />}
                 </Button>
@@ -171,7 +192,8 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
 
             <div className="flex-1 overflow-auto">
               <CodeView 
-                code={files[selectedFile]}
+                //code={files[selectedFile]}
+                code={decodedCode}
                 lang={getLanguageFromExtension(selectedFile)}
               />
             </div>
