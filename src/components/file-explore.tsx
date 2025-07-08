@@ -32,35 +32,35 @@ interface FileBreadcrumbProps {
   filepath: string;
 }
 
-const FileBreadcrumb = ({ filepath }: FileBreadcrumbProps) => {
-  const pathSegments = filepath.split("/");
+const FileBreadcrumb = ({ filepath }: FileBreadcrumbProps) => {     // Se reciben las keys del archivo file de respuesta de la ia ("app/cta.tsx, app/features.tsx. etc")
+  const pathSegments = filepath.split("/");                         // Se dividen las keys en segmentos
   const maxSegments = 3
 
   const renderBreadcrumbItems = () => {
-    if(pathSegments.length <= maxSegments){
-      // Show all segments of 3 or less
-      return pathSegments.map((segment, index) => {
-        const isLast = index === pathSegments.length - 1;
+    if(pathSegments.length <= maxSegments){                         // Si el numero de segmentos es menor o igual a 3, se muestran todos
+      return pathSegments.map((segment, index) => {                 // Se recorren todos los segmentos
+        const isLast = index === pathSegments.length - 1;           // Se determina si es el último segmento
         return (
           <Fragment key={index}>
             <BreadcrumbItem>
-              {isLast ? (
+              {isLast ? (                                           // Si es el último segmento, se muestra el nombre del archivo mas oscuro y en negrita
                 <BreadcrumbPage className="font-medium">
                   {segment}
                 </BreadcrumbPage>
-              ) : (
-                <span className="text-muted-foreground">
+              ) : (                                                 // Sino es el último renderiza con un color mas tenue                                                
+                <span className="text-muted-foreground">             
                   {segment}
                 </span>
               )}
             </BreadcrumbItem>
 
-            {!isLast && <BreadcrumbSeparator />}
+            {/* Sino es el último segmento, se renderiza un separador */}
+            {!isLast && <BreadcrumbSeparator />}                         
           
           </Fragment>
         )
       })
-    } else {
+    } else {                                                        // Si el numero de segmentos es mayor a 3, se muestra el primero, tres puntos y el último
       const firstSegment = pathSegments[0]
       const lastSegment = pathSegments[pathSegments.length - 1]
     
@@ -107,7 +107,7 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
   const [copied, setCopied] = useState(false);
 
   const [selectedFile, setSelectedFile] = useState<string | null>(() => {
-    const fileKeys = Object.keys(files);                                    // Obtenemos las claves de los archivos
+    const fileKeys = Object.keys(files);                                    // Obtenemos las claves de los archivos: "app/cta.tsx, app/features.tsx. etc"
     return fileKeys.length > 0 ? fileKeys[0] : null;                        // Si hay archivos, seleccionamos el primero
   });
 
