@@ -33,10 +33,11 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
       (message) => message.role === "ASSISTANT" && !!message.fragment
     )
 
-    if (lastAssistanceMessageWithFragment ){
+    // Solo establece el fragmento activo si no hay uno ya seleccionado por el usuario.
+    if (lastAssistanceMessageWithFragment && !activeFragment) {
       setActiveFragment(lastAssistanceMessageWithFragment.fragment)                     // Si se encuentra un mensaje de asistencia, se establece como fragmento activo
     }
-  },[messages, setActiveFragment])
+  },[messages, setActiveFragment, activeFragment])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView();                                                //  Hace scroll automáticamente hasta el final del contenedor de mensajes cada vez que se añade un nuevo mensaje.
