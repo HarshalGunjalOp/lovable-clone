@@ -27,8 +27,8 @@ function getLanguageFromExtension(filename:string):string {
   const extension = filename.split(".")?.pop()?.toLowerCase();
   return extension || "text"
 }
-function decodeHtmlEntities(text: string): string {
- 
+
+function decodeHtmlEntities(text: string): string {                                      // Gemini en su respuesta incluye entidades html como &lt; y &gt; que no se pueden decodificar en el navegador
   if (typeof document === 'undefined') {
     return text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
   }
@@ -140,7 +140,7 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
     }
   },[selectedFile, files])
 
-  const decodedCode = useMemo(() => {
+  const decodedCode = useMemo(() => {                                              // The AI sometimes wraps the code in backticks, which we need to remove.   
     if (!selectedFile || !files[selectedFile]) {
       return "";
     }
