@@ -105,6 +105,8 @@ interface FileExplorerProps {
 
 export const FileExplorer = ({ files }: FileExplorerProps) => {
 
+  const [copied, setCopied] = useState(false);
+
   const [selectedFile, setSelectedFile] = useState<string | null>(() => {
     const fileKeys = Object.keys(files);                                    // Obtenemos las claves de los archivos
     return fileKeys.length > 0 ? fileKeys[0] : null;                        // Si hay archivos, seleccionamos el primero
@@ -120,7 +122,15 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
     if(files[filePath]){
       setSelectedFile(filePath)
     }
-  },[files])
+  },[files]);
+
+  const handleCopy = useCallback(() => {
+    if(selectedFile){
+      navigator.clipboard.writeText(files[selectedFile])
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  },[selectedFile, files])
 
   return (
     <ResizablePanelGroup direction="horizontal">
@@ -152,10 +162,10 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
                   variant="outline"
                   size="icon"
                   className="ml-auto"
-                  onClick={() => {}}
-                  disabled={false}
+                  onClick={handleCopy}
+                  disabled={copied}
                 > 
-                  <CopyIcon />
+                  {copied ? <CopyCheckIcon /> : <CopyIcon />}
                 </Button>
               </Hint>
             </div>
