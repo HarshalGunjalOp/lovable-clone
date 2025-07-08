@@ -1,7 +1,7 @@
 /* Prism.js GitHub Dark Theme */
 
-code[class*= 'language-'],
-  pre[class*= 'language-'] {
+code[class*='language-'],
+pre[class*='language-'] {
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono',
     'Droid Sans Mono', 'Source Code Pro', monospace;
   text-align: left;
@@ -14,8 +14,8 @@ code[class*= 'language-'],
   hyphens: none;
 }
 
-code[class*= 'language-'],
-  pre[class*= 'language-'] {
+code[class*='language-'],
+  pre[class*='language-'] {
   color: #24292e;
 }
 
@@ -54,7 +54,7 @@ code[class*= 'language-'],
 .token.operator,
 .token.entity,
 .token.url,
-.language-css.token.string,
+.language-css .token.string,
 .style .token.string {
   color: #d73a49;
   background: transparent;
@@ -91,8 +91,8 @@ code[class*= 'language-'],
 }
 
 /* Dark */
-.dark code[class*= 'language-'],
-.dark pre[class*= 'language-'] {
+.dark code[class*='language-'],
+.dark pre[class*='language-'] {
   color: #e1e4e8;
 }
 
@@ -133,7 +133,7 @@ code[class*= 'language-'],
 .dark .token.operator,
 .dark .token.entity,
 .dark .token.url,
-.dark .language-css.token.string,
+.dark .language-css .token.string,
 .dark .style .token.string {
   color: #e1e4e8; /* editor.foreground */
 }

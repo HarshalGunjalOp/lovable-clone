@@ -17,7 +17,7 @@ interface Props {
 export const CodeView = ({ code, lang }: Props) => {
 
   useEffect(() => {
-    Prism.highlightAll();
+    Prism.highlightAll(); // highlight all code blocks
   },[code])
 
   return (
