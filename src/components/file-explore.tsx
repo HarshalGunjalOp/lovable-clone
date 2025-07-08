@@ -34,11 +34,11 @@ interface FileBreadcrumbProps {
 
 const FileBreadcrumb = ({ filepath }: FileBreadcrumbProps) => {
   const pathSegments = filepath.split("/");
-  const maxSegments = 4
+  const maxSegments = 3
 
   const renderBreadcrumbItems = () => {
     if(pathSegments.length <= maxSegments){
-      // Show all segments of 4 or less
+      // Show all segments of 3 or less
       return pathSegments.map((segment, index) => {
         const isLast = index === pathSegments.length - 1;
         return (
@@ -84,7 +84,6 @@ const FileBreadcrumb = ({ filepath }: FileBreadcrumbProps) => {
                 {lastSegment}
               </BreadcrumbPage>
             </BreadcrumbItem>
-
           </BreadcrumbItem>
         </>
       )
