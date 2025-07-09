@@ -146,10 +146,14 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
     }
     let code = decodeHtmlEntities(files[selectedFile] || "");
   
-    if (code.startsWith('`') && code.endsWith('`')) {
-      code = code.slice(1, -1);
+    if (code.startsWith("```") && code.endsWith("```")) {
+      const lines = code.split("\n");
+      return lines.slice(1, lines.length - 1).join("\n");
+    } else if (code.startsWith("`") && code.endsWith("`")) {
+      return code.slice(1, -1);
     }
-    return code;
+
+    return code
   }, [selectedFile, files]);
 
   return (
