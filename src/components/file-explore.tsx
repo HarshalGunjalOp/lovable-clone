@@ -159,8 +159,8 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel
-        defaultSize={30}
-        minSize={30}
+        defaultSize={25}
+        minSize={25}
         className="bg-sidebar"
       >
         
