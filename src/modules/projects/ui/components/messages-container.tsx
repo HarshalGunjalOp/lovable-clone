@@ -18,6 +18,7 @@ interface Props {
 export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment }: Props) => {
 
   const bottomRef = useRef<HTMLDivElement>(null);
+  const lastAssistantMessageIdRef = useRef<string | null>(null);                        // Ref para "recordar" el ID del último mensaje del asistente que se procesó.
 
   const trpc = useTRPC();
 
@@ -28,16 +29,18 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
     retry: 3,
   });
 
-  useEffect(() => {
-    const lastAssistanceMessageWithFragment = messages.findLast(                        // Encontramos el último mensaje de asistencia que tenga un fragmento asociado
-      (message) => message.role === "ASSISTANT" && !!message.fragment
+  useEffect(() => {                                                                   // Maneja dos situaciones diferentes:
+    const lastAssistantMessage = messages.findLast(
+      (message) => message.role === "ASSISTANT"
     )
 
-    // Solo establece el fragmento activo si no hay uno ya seleccionado por el usuario.
-    if (lastAssistanceMessageWithFragment && !activeFragment) {
-      setActiveFragment(lastAssistanceMessageWithFragment.fragment)                     // Si se encuentra un mensaje de asistencia, se establece como fragmento activo
+    if (lastAssistantMessage?.fragment &&                                              // 1º Cuando llega una nueva respuesta de la IA
+      lastAssistantMessage.id !== lastAssistantMessageIdRef.current                    // se detecta que el ID del último mensaje del asistnte es nuevo
+    ){
+      setActiveFragment(lastAssistantMessage.fragment)                                 // En este caso, se activa el fragmento correspondiente
+      lastAssistantMessageIdRef.current = lastAssistantMessage.id                      // y se actualiza la referencia del último mensaje del asistente
     }
-  },[messages, setActiveFragment, activeFragment])
+  },[messages, setActiveFragment, activeFragment])                                     // 2º cuando el usuario hace click en un fragmento activo (onFragmentClick) el if da false y el useEffecto no hace nada. Se respeta la seleccion del usuario.
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView();                                                //  Hace scroll automáticamente hasta el final del contenedor de mensajes cada vez que se añade un nuevo mensaje.
