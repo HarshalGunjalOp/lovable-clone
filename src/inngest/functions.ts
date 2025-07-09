@@ -22,7 +22,7 @@ export const codeAgentFunction = inngest.createFunction(
   async ({ event, step }) => { // event contiene el propmt y el projectId
 
     const sandboxId = await step.run("get-sandbox-id", async () => {
-      const sandbox = await Sandbox.create("lovableclone-test14");
+      const sandbox = await Sandbox.create("lovableclone-test16");
       //await sandbox.setTimeout(60)
       return sandbox.sandboxId;
     })
@@ -165,7 +165,7 @@ export const codeAgentFunction = inngest.createFunction(
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
       const host = sandbox.getHost(3000)
-      return `https://${host}`
+      return `https://${host}`  
     })
     
     await step.run("save-result", async() => {                                       // Guardar el resultado de la tarea en la base de datos

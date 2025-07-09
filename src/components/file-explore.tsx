@@ -145,7 +145,7 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
       return "";
     }
     let code = decodeHtmlEntities(files[selectedFile] || "");
-    // The AI sometimes wraps the code in backticks, which we need to remove.
+  
     if (code.startsWith('`') && code.endsWith('`')) {
       code = code.slice(1, -1);
     }
