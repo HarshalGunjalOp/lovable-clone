@@ -3,8 +3,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import { cache } from 'react';
 import superjason from 'superjson';
 
-export const createTRPCContext = cache(async () => {
-                                  
+export const createTRPCContext = cache(async () => {                                
   const session = await auth()                                      /** Llamada a Clerk para obtener la session del usuario que se incluye en el contexto de tRPC */
   return {    
     auth: session
