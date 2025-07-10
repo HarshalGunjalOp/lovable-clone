@@ -21,22 +21,24 @@ const Navbar = () => {
         <span className="font-semibold text-lg">Vibe</span>
         </Link>
 
-        <SignedOut>
-          <SignUpButton>
-            <Button variant="outline" size="sm">
-              Sign Up
-            </Button>
-          </SignUpButton>
-          <SignInButton>
-            <Button  size="sm">
-              Sign In
-            </Button>
-          </SignInButton>
-        </SignedOut>
+        <div className="flex gap-2">
+          <SignedOut>
+            <SignUpButton>
+              <Button variant="outline" size="sm">
+                Sign Up
+              </Button>
+            </SignUpButton>
+            <SignInButton>
+              <Button  size="sm">
+                Sign In
+              </Button>
+            </SignInButton>
+          </SignedOut>
 
-        <SignedIn>
-          <UserControl showName={true} />
-        </SignedIn>
+          <SignedIn>
+            <UserControl showName={true} />
+          </SignedIn>
+        </div>
       </div>
     </nav>
   )
