@@ -1,27 +1,24 @@
 import 'server-only'; // <-- ensure this file cannot be imported from the client
+
 import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
 import { cache } from 'react';
-import { createCallerFactory, createTRPCContext } from './init';
+
+import { createTRPCContext } from './init';
 import { makeQueryClient } from './query-client';
 import { appRouter } from './routers/_app';
 
 
 /**
- * Factory para crear "callers" de tRPC.
- * Un "caller" es una forma de invocar tus procedimientos tRPC desde el lado del servidor
- * directamente, sin pasar por una capa HTTP. Está configurado con tu `appRouter`.
- * @see https://trpc.io/docs/server/server-side-calls
- */
-const callerFactory = createCallerFactory(appRouter);
-
-/**
  * Instancia del "caller" de tRPC para uso exclusivo en el servidor.
  * Permite llamar a tus procedimientos tRPC (queries, mutations) como si fueran funciones
- * directas desde Server Components, API Routes, etc.
- * Se inicializa con un contexto (`createTRPCContext`). Si tu contexto es asíncrono,
- * esto utiliza top-level await (soportado en Next.js con módulos ESM).
+ * directas desde Server Actions o Route Handlers.
+ *
+ * IMPORTANTE: Se le pasa la función `createTRPCContext` como factory, no el contexto
+ * resuelto. Esto asegura que se cree un nuevo contexto para cada petición,
+ * manteniendo el aislamiento y la seguridad de los datos del usuario.
+ * @see https://trpc.io/docs/server/server-side-calls
  */
-export const caller = callerFactory(await createTRPCContext());
+export const caller = appRouter.createCaller(createTRPCContext);
 
 
 /**
@@ -35,5 +32,3 @@ export const trpc = createTRPCOptionsProxy({           // Configura el proxy de 
   router: appRouter,
   queryClient: getQueryClient,
 });
-
-
