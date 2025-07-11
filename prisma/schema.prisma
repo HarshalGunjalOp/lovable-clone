@@ -60,3 +60,9 @@ model Project {
 
   messages Message[]
 }
+
+model Usage {
+  key String @id 
+  points Int
+  expire DateTime?
+}
