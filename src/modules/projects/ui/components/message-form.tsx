@@ -14,6 +14,7 @@ import { useTRPC } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
 import { Usage } from "./usage";
+import { useRouter } from "next/navigation";
 
 
 
@@ -31,6 +32,7 @@ const formSchema = z.object({
 
 export const MessageForm = ({ projectId }: Props) => {
   
+  const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -47,11 +49,13 @@ export const MessageForm = ({ projectId }: Props) => {
     onSuccess: (data) => {
       form.reset();
       queryClient.invalidateQueries(trpc.messages.getMany.queryOptions({ projectId: data.projectId }));
-      //TODO: Invalidate usage status
+      queryClient.invalidateQueries(trpc.usage.status.queryOptions());
     },
     onError: (error) => {
-      //TODO: Redirect to pricing page if specific error
       toast.error(error.message);
+      if(error.data?.code === "TOO_MANY_REQUESTS"){
+        router.push("/pricing");
+      }
     }
   }))
   
