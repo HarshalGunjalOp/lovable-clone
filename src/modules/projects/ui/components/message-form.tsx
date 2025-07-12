@@ -7,12 +7,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextareaAutosize from "react-textarea-autosize";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
+import { Usage } from "./usage";
 
 
 
@@ -32,6 +33,8 @@ export const MessageForm = ({ projectId }: Props) => {
   
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+
+  const { data: usage } = useQuery(trpc.usage.status.queryOptions())
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,12 +64,17 @@ export const MessageForm = ({ projectId }: Props) => {
   
   
   const [isFocused, setIsFocused] = useState(false);
-  const showUsage = false;
+  const showUsage = !!usage;
   const isPending = createMessage.isPending;
   const isButtonDisabled = isPending || !form.formState.isValid;
 
   return (
     <Form {...form}>
+      {showUsage && (
+        <Usage 
+          points={usage.remainingPoints} 
+          msBeforeNext={usage.msBeforeNext} />
+      )}
       <form 
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(

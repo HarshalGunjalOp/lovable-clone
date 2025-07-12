@@ -9,7 +9,7 @@ const GENERATION_COST = 1;
 export async function getUsagetracker() {
   const usageTracker = new RateLimiterPrisma({    // Esta herramienta se configura para que
     storeClient: prisma,                          // use Prisma para conectarse a la base de datos
-    tableName: "Usage",                           // y almacene los datos en la tabla "Usage" de la base de datos.
+    tableName: "Usage",                           // y almacene los datos en la tabla "Usage" 
     points: FREE_POINTS,                          // Asigna 5 puntos gratuitos a cada usuario
     duration: DURATION,                           // siendo válidos por 30 días
   });
@@ -41,6 +41,6 @@ export async function getUsageStatus(){                                         
   }
 
   const usageTracker = await getUsagetracker();
-  const result = await usageTracker.get(userId);                                     
+  const result = await usageTracker.get(userId);   // result contiene remainingPoints y msBeforeNext                                  
   return result;
 }
