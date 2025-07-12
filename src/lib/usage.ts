@@ -3,15 +3,20 @@ import { prisma } from "./db"
 import { auth } from "@clerk/nextjs/server";
 
 const FREE_POINTS = 5;
+const PRO_POINTS = 100;
 const DURATION = 30 * 24 * 60 * 60; // 30 days
 const GENERATION_COST = 1;
 
 export async function getUsagetracker() {
-  const usageTracker = new RateLimiterPrisma({    // Esta herramienta se configura para que
-    storeClient: prisma,                          // use Prisma para conectarse a la base de datos
-    tableName: "Usage",                           // y almacene los datos en la tabla "Usage" 
-    points: FREE_POINTS,                          // Asigna 5 puntos gratuitos a cada usuario
-    duration: DURATION,                           // siendo válidos por 30 días
+
+  const { has } = await auth();                   // Obtiene el objeto de autenticación de Clerk
+  const hasProAccess = has({ plan: "pro" });      // y dentro se verifica si el usuario tiene acceso a la plan "pro"
+
+  const usageTracker = new RateLimiterPrisma({      // Esta herramienta se configura para que
+    storeClient: prisma,                            // use Prisma para conectarse a la base de datos
+    tableName: "Usage",                             // y almacene los datos en la tabla "Usage" 
+    points: hasProAccess ? PRO_POINTS :FREE_POINTS, // Asigna puntos en función de si el usuario tiene acceso a la plan "pro" o no.
+    duration: DURATION,                             // siendo válidos por 30 días
   });
   return usageTracker;
 }
