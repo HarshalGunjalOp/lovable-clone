@@ -1,5 +1,5 @@
 import { inngest } from "./client";
-import { createAgent, gemini, createTool, createNetwork, type Tool } from "@inngest/agent-kit";
+import { createAgent, gemini, createTool, createNetwork, type Tool, type Message, createState } from "@inngest/agent-kit";
 import  { Sandbox } from "@e2b/code-interpreter"
 import { getSandbox } from "./utils";
 import { z } from "zod";
@@ -26,6 +26,38 @@ export const codeAgentFunction = inngest.createFunction(
       //await sandbox.setTimeout(60)
       return sandbox.sandboxId;
     })
+
+    const previousMessages = await step.run("get-previous-messages", async () => {  // Obtener los mensajes anteriores del proyecto
+      const formattedMessages: Message[] = []
+      const messages = await prisma.message.findMany({
+        where: {
+          projectId: event.data.projectId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      for (const message of messages) {
+        formattedMessages.push({
+          type: "text",
+          role: message.role === "ASSISTANT" ? "assistant" : "user",
+          content: message.content,
+        })
+      }
+
+      return formattedMessages;
+    })
+
+    const state = createState<AgentState>(                                           // Crear un estado para el agente de código
+      {
+        summary: "",
+        files: {},
+      },
+      {
+        messages: previousMessages,
+      }
+    );                                              
 
     const codeAgent = createAgent<AgentState>({                                      // Crear agente de código
       name: "code-agent",
@@ -145,6 +177,7 @@ export const codeAgentFunction = inngest.createFunction(
       name: "coding-agent-network",
       agents: [codeAgent],                                                           // Actualmente tenemos un solo agente de código
       maxIter: 15,
+      defaultState: state,
       router: async ({ network }) => {                                               // el router decide qué agente debe actuar a continuación. Para ello usa network.state que es un state que almacena información durante la ejecutcion de las herramientas y el lifecycle de un agente de IA.
         const summary = network.state.data.summary;                                  // Si el resumen de tarea está presente, no debe actuar porque ya se ha completado la tarea
 
@@ -156,7 +189,7 @@ export const codeAgentFunction = inngest.createFunction(
       }
     })
 
-    const result = await network.run(event.data.value);                              // Inicia la ejecución de la red de agentes con el input del usuario y espera a que se complete. 
+    const result = await network.run(event.data.value, { state: state });            // Inicia la ejecución de la red de agentes con el input del usuario y espera a que se complete. 
 
     const isError = 
       !result.state.data.summary ||
