@@ -1,9 +1,9 @@
 import { inngest } from "./client";
 import { createAgent, gemini, createTool, createNetwork, type Tool, type Message, createState } from "@inngest/agent-kit";
 import  { Sandbox } from "@e2b/code-interpreter"
-import { getSandbox } from "./utils";
+import { getSandbox, parseAgentOutput } from "./utils";
 import { z } from "zod";
-import { PROMPT } from "../prompt";
+import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "../prompt";
 import { lastAssistantTextMessageContent } from "./utils";
 import { prisma } from "@/lib/db";
 
@@ -34,7 +34,7 @@ export const codeAgentFunction = inngest.createFunction(
           projectId: event.data.projectId,
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: "asc" // A mi me funcionó así. Si no te funciona cambialo a "desc"
         },
       });
 
@@ -64,8 +64,8 @@ export const codeAgentFunction = inngest.createFunction(
       description: "An expert coding agent",
       system: PROMPT,
       model: gemini({
-        model: "gemini-1.5-flash", 
-        apiKey: process.env.GEMINI_API_KEY
+        model: "gemini-1.5-flash",                                                   // Gemini wraps the code in backticks, which we need to remove.
+        apiKey: process.env.GEMINI_API_KEY                                           // Look at <FileExplorer /> the DecodedCode function.
       }),
       tools: [                                                                       // Herramientas del agente de código
         
@@ -191,6 +191,29 @@ export const codeAgentFunction = inngest.createFunction(
 
     const result = await network.run(event.data.value, { state: state });            // Inicia la ejecución de la red de agentes con el input del usuario y espera a que se complete. 
 
+    const fragmentTitleGenerator = createAgent({                                     // Sub-agentes para cuando termina el agente principal
+      name: "fragment-title-generator",                                              // Genera un título corto y descriptivo para el fragmento de código.
+      description: "A fragment title generator",
+      system: FRAGMENT_TITLE_PROMPT,
+      model: gemini({
+        model: "gemini-1.5-flash",                                                   
+        apiKey: process.env.GEMINI_API_KEY                                           
+      }),
+    });
+
+    const responseGenerator = createAgent({                                          // Genera una respuesta amigable y conversacional para el usuario final.
+      name: "response-generator",
+      description: "A response generator",
+      system: RESPONSE_PROMPT,
+      model: gemini({
+        model: "gemini-1.5-flash",                                                   
+        apiKey: process.env.GEMINI_API_KEY                                           
+      }),
+    });
+
+    const { output: fragmentTitleOutput } = await fragmentTitleGenerator.run(result.state.data.summary); // La respuesta de los agentes es un array de objetos tipo Message
+    const { output: responseOutput } = await responseGenerator.run(result.state.data.summary);           // Y se matizará el resultado con la función parseAgentOutput
+
     const isError = 
       !result.state.data.summary ||
       Object.keys(result.state.data.files || {}).length === 0;
@@ -217,13 +240,13 @@ export const codeAgentFunction = inngest.createFunction(
       return await prisma.message.create({
         data: {
           projectId: event.data.projectId,
-          content: result.state.data.summary,
+          content: parseAgentOutput(responseOutput), 
           role: "ASSISTANT",
           type: "RESULT",
           fragment: {
             create: {
               sandboxUrl: sandboxUrl,
-              title: "Fragment",
+              title: parseAgentOutput(fragmentTitleOutput),
               files: result.state.data.files,
             }
           }
@@ -233,7 +256,7 @@ export const codeAgentFunction = inngest.createFunction(
 
     return {
       sandboxUrl,
-      title: "Fragment",
+      title: "Fragment" ,
       files: result.state.data.files,
       summary: result.state.data.summary
     };
