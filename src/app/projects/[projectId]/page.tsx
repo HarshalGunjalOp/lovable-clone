@@ -1,8 +1,9 @@
+import Error from "@/app/error";
 import { ProjectView } from "@/modules/projects/ui/views/project-view";
 import { getQueryClient, trpc } from "@/trpc/server"
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
-
+import { ErrorBoundary } from "react-error-boundary";
 
 interface Props {
   params: Promise<{
@@ -11,8 +12,8 @@ interface Props {
 }
 
 
-const Page = async({ params }: Props) => {
-  
+const Page = async ({ params }: Props) => {
+
   const { projectId } = await params;
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(trpc.messages.getMany.queryOptions({ projectId }));
@@ -23,11 +24,11 @@ const Page = async({ params }: Props) => {
     // HydrationBoundary es una utilidad de TanStack Query recibe el estado serializado de la caché a través la prop state
     // Cuando se carga <AgentsView /> HydrationBoundary se encarga de volver a cargar la caché y "deserializa"/hydrata los datos
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={<div>Loading project...</div>}>
-        {/* <ErrorBoundary fallback={<div>Something went wrong...</div>}> */}
+      <ErrorBoundary fallback={<Error />}>
+        <Suspense fallback={<div>Loading project...</div>}>
           <ProjectView projectId={projectId} />
-        {/* </ErrorBoundary> */}
-      </Suspense>
+        </Suspense>
+      </ErrorBoundary>
     </HydrationBoundary>
   )
 }
