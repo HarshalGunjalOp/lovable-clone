@@ -37,6 +37,7 @@ export const codeAgentFunction = inngest.createFunction(
         orderBy: {
           createdAt: "asc" // A mi me funcionó así. Si no te funciona cambialo a "desc"
         },
+        take: 5,
       });
 
       for (const message of messages) {
@@ -47,7 +48,7 @@ export const codeAgentFunction = inngest.createFunction(
         })
       }
 
-      return formattedMessages;
+      return formattedMessages; // if you use "desc" add ".reverse()"
     })
 
     const state = createState<AgentState>(                                           // Crear un estado para el agente de código
