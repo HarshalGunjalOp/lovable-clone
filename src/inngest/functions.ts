@@ -6,6 +6,7 @@ import { z } from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "../prompt";
 import { lastAssistantTextMessageContent } from "./utils";
 import { prisma } from "@/lib/db";
+import { SANDBOX_TIMEOUT } from "./types";
 
 interface AgentState {
   summary: string;
@@ -23,7 +24,7 @@ export const codeAgentFunction = inngest.createFunction(
 
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create("lovableclone-test16");
-      //await sandbox.setTimeout(60)
+      await sandbox.setTimeout(SANDBOX_TIMEOUT) // 30 min. More time only premiun E2B users
       return sandbox.sandboxId;
     })
 
