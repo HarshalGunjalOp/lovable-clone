@@ -66,7 +66,7 @@ export const codeAgentFunction = inngest.createFunction(
       description: "An expert coding agent",
       system: PROMPT,
       model: gemini({
-        model: "gemini-1.5-flash",                                                   // Gemini wraps the code in backticks, which we need to remove.
+        model: "gemini-1.5-flash", // also disponible gemini-1.5-pro and others      // Gemini wraps the code in backticks, which we need to remove.
         apiKey: process.env.GEMINI_API_KEY                                           // Look at <FileExplorer /> the DecodedCode function.
       }),
       tools: [                                                                       // Herramientas del agente de código
