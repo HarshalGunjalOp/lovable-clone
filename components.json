@@ -17,7 +17,8 @@
     "ui": "@/components/ui",
     "lib": "@/lib",
     "hooks": "@/hooks",
-    "trpc": "@/trpc"
+    "trpc": "@/trpc",
+    "inngest": "@/inngest"
   },
   "menuColor": "default",
   "menuAccent": "subtle",
